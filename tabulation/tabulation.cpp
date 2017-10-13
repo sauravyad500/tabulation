@@ -42,8 +42,8 @@ class node
 	vector<int> n;
 	vector<int> diff;
 	int group;
-	bool included;
-	node () { included = false; }
+	bool grouped;
+	node () { grouped = false; }
 	bool operator ==(node r);
 }temp;
 vector<node> minterms, t_minterms, pi;
@@ -51,16 +51,16 @@ int no_minterms, column, temp_n = -1;
 
 bool node::operator ==(node r)
 {
-	if (n.size() == r.n.size() )
+	if ( n.size () == r.n.size () )
 	{
-		for ( int i = 0; i < n.size(); i++ )
+		for ( int i = 0; i < n.size (); i++ )
 		{
 			if ( n[i] != r.n[i] )  return false;
 		}
 	}
-	if ( diff.size() == r.diff.size() )
+	if ( diff.size () == r.diff.size () )
 	{
-		for ( int i = 0; i < diff.size(); i++ )
+		for ( int i = 0; i < diff.size (); i++ )
 		{
 			if ( diff[i] != r.diff[i] )  return false;
 		}
@@ -71,15 +71,41 @@ bool node::operator ==(node r)
 
 bool operator ==(vector<int>x, vector<int>y)
 {
-	if(x.size()==y.size() )
+	if ( x.size () == y.size () )
 	{
-		for ( int i = 0; i < x.size(); i++ )
+		for ( int i = 0; i < x.size (); i++ )
 		{
 			if ( x[i] != y[i] ) return false;
 		}
 		return true;
 	}
 	else return false;
+}
+
+bool if_notpresent (node t)
+{
+	int check = 0;
+	for ( node f : pi )
+	{
+		if(f.n.size()==t.n.size() )
+		{ 
+			for ( int i = 0; i < f.n.size (); i++ )
+			{
+				if ( f.n[i] != t.n[i] ) { check++; break; }
+			}
+		}
+		else check++;
+		if ( f.diff.size () == t.diff.size () )
+		{
+			for ( int i = 0; i < f.diff.size (); i++ )
+			{
+				if ( f.diff[i] != t.diff[i] ) { check++; break; }
+			}
+		}
+		else check++;
+		if ( f.grouped != t.grouped ) check++;
+		if ( check == 0 ) return true; else return false;
+	}
 }
 
 bool compare (int x, int y)
@@ -100,7 +126,7 @@ bool compare (int x, int y)
 
 int main ()
 {
-	int t;
+	int t,groups;
 	cout << "Enter the number of minterms";
 	cin >> no_minterms;
 	for ( int i = 0; i < no_minterms; i++ )
@@ -112,46 +138,92 @@ int main ()
 		temp.diff.clear ();
 		//delete(&temp);
 	}
-	
-	for ( node temp : minterms )
+
+	do
 	{
-		for ( node r : minterms )
+		groups = 0;
+		for ( int k = 0; k < minterms.size (); k++ )
 		{
-			if ( r == temp ) continue;
-			if ( r.group == temp.group + 1 )
+			for ( int j = 0; j < minterms.size (); j++ )
 			{
-				if ( r.n.size()==0 || r.n==temp.n)
+				if ( minterms[j] == minterms[k] ) continue;
+				if ( minterms[j].group == minterms[k].group + 1 )
 				{
-					int k = 0;
-					for ( int i = 0; i < r.diff.size(); i++ ) { if ( !is_powerof2 (r.diff[i] - temp.diff[i]) ) { k = 1; break; } }
-					if ( k == 0 )
+					if ( minterms[j].n.size () == 0 || minterms[j].n == minterms[k].n )
 					{
-						node t;
-						for ( int i : temp.diff ) { t.diff.push_back (i); cout << i<<"  "; }
-						for ( int i : r.diff ) { t.diff.push_back (i); cout << i << "  "; } cout << "\t";
-						for ( int i = 0; i < r.diff.size(); i++ )
+						int p = 0;
+						for ( int i = 0; i < minterms[j].diff.size (); i++ ) { if ( !is_powerof2 (minterms[j].diff[i] - minterms[k].diff[i]) ) { p = 1; break; } }
+						if ( p == 0 )
 						{
-							t.n.push_back (r.diff[i] - temp.diff[i]);  cout << r.diff[i] - temp.diff[i] << "  ";
+							node t;
+							for ( int i : minterms[k].diff ) { t.diff.push_back (i);/* cout << i << "  ";*/ }
+							for ( int i : minterms[j].diff ) { t.diff.push_back (i);/* cout << i << "  ";*/ } //cout << "\t";
+							for ( int i = 0; i < minterms[j].diff.size (); i++ )
+							{
+								t.n.push_back (minterms[j].diff[i] - minterms[k].diff[i]); // cout << minterms[j].diff[i] - minterms[k].diff[i] << "  ";
+							}
+							for ( int i : minterms[k].n ) t.n.push_back (i);
+							sort (t.diff.begin (), t.diff.end ());
+							sort (t.n.begin (), t.n.end ());
+							auto last = unique (t.n.begin (), t.n.end ());
+							t.n.erase (last, t.n.end ());
+							//t.grouped = false;
+							t.group = minterms[k].group;
+							if(if_notpresent(t)) t_minterms.push_back (t);
+							groups++;
+							//cout << "\t" << t.group << "\n";
+							minterms[k].grouped = minterms[j].grouped = true;
+
+/*							cout << "diff : ";
+							for ( int i : t.diff ) cout << i << "\t"; cout << "n : ";
+							for ( int i : t.n ) cout << i << "\t"; cout << "group : ";
+							cout << t.group<<"\t\n";
+							//cout << "grouped\n";*/
+
+
+
 						}
-						sort (t.diff.begin (), t.diff.end ());
-						sort (t.n.begin (), t.n.end ());
-						t.group = temp.group;
-						t_minterms.push_back (t);
-						r.included = temp.included = true;
-						cout << "\t" << t.group << "\n";
-
-
-
 					}
 				}
 			}
-		}
-		if ( temp.included == false ) pi.push_back (temp);
+			cout << "diff : ";
+			for ( int i : minterms[k].diff ) cout << i << "\t"; cout << "n : ";
+			for ( int i : minterms[k].n ) cout << i << "\t"; cout << "group : ";
+			cout << minterms[k].group;
+			if ( !minterms[k].grouped ) { pi.push_back (minterms[k]); cout << "\tungrouped\n"; } else cout << "\tgrouped\n";
+		} cout << "\n\n\n\n";
+		minterms.clear ();
+		copy (t_minterms.begin (), t_minterms.end (), back_inserter (minterms));
+		t_minterms.clear ();
+
+	} while ( groups != 0 );
+	//remove duplicates
+
+	cout << "\n\n\n\n\t size" << pi.size () << "\n";
+	for ( node temp : pi )
+	{
+		for ( int i : temp.diff ) cout << i << "\t"; cout << "\t n \t";
+		for ( int i : temp.n ) cout << i << "\t"; cout << "\tgroup\t";
+		cout << temp.group << "\t";
+		//if ( temp.group ) cout << "grouped"; else cout << "ungrouped";
+		cout << "\n";
+	}cout << "\n\n\n";
+	//sort (pi.begin (), pi.end ());
+	auto last = std::unique (pi.begin (), pi.end ());
+	pi.erase (last, pi.end ());
+
+	cout <<"\n\n\n\n\t size"<< pi.size () << "\n";
+	for ( node temp : pi )
+	{
+		for ( int i : temp.diff ) cout << i << "\t"; cout << "\t\t";
+		for ( int i : temp.n ) cout << i <<"\t";
+		//cout << temp.group << "\t";
+		//if ( temp.group ) cout << "grouped"; else cout << "ungrouped";
+		cout << "\n";
 	}
 
-	
-	
-	_sleep (50000);
+
+	_sleep (150000);
 	return 0;
 }
 
