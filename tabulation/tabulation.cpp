@@ -72,18 +72,6 @@ bool node::operator ==(node r)
 	return true;
 }
 
-/*bool operator ==(vector<int>x, vector<int>y)
-{
-	if ( x.size () == y.size () )
-	{
-		for ( int i = 0; i < x.size (); i++ )
-		{
-			if ( x[i] != y[i] ) return false;
-		}
-		return true;
-	}
-	else return false;
-}*/
 
 template <typename tl>
 bool if_notpresent (tl t, vector<tl> pr)
@@ -138,7 +126,6 @@ int main ()
 		temp.group = count (to_binary (t));
 		minterms.push_back (temp);
 		temp.diff.clear ();
-		//delete(&temp);
 	}
 
 	do
@@ -169,18 +156,11 @@ int main ()
 							sort (t.n.begin (), t.n.end ());
 							auto last = unique (t.n.begin (), t.n.end ());
 							t.n.erase (last, t.n.end ());
-							//t.grouped = false;
 							t.group = minterms[k].group;
 							t_minterms.push_back (t);
 							groups++;
-							//cout << "\t" << t.group << "\n";
 							minterms[k].grouped = minterms[j].grouped = true;
 
-/*							cout << "diff : ";
-							for ( int i : t.diff ) cout << i << "\t"; cout << "n : ";
-							for ( int i : t.n ) cout << i << "\t"; cout << "group : ";
-							cout << t.group<<"\t\n";
-							//cout << "grouped\n";*/
 
 
 
@@ -207,7 +187,6 @@ int main ()
 		for ( int i : temp.diff ) cout << i << "\t"; cout << "\t n \t";
 		for ( int i : temp.n ) cout << i << "\t"; cout << "\tgroup\t";
 		cout << temp.group << "\t";
-		//if ( temp.group ) cout << "grouped"; else cout << "ungrouped";
 		cout << "\n";
 	}cout << "\n\n\n";
 
@@ -237,7 +216,6 @@ int main ()
 			for ( int i : temp.diff ) cout << i << "\t"; cout << "\t n \t";
 			for ( int i : temp.n ) cout << i << "\t"; cout << "\tgroup\t";
 			cout << temp.group << "\t";
-			//if ( temp.group ) cout << "grouped"; else cout << "ungrouped";
 			cout << "\n";
 		}
 	}cout << "\n\n\n";
